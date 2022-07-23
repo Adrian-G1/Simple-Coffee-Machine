@@ -25,6 +25,8 @@ MENU = {
     }
 }
 
+money = 0.0
+
 resources = {
     "water": 300,
     "milk": 200,
@@ -32,86 +34,64 @@ resources = {
 }
 
 
-# TODO: 1. Prompt user for input
-
 def start(resources: list):
-    money = 0.0
     while True:
         response: str = input("What would you like? (espresso/latte/cappuccino): ")
 
-        if response == "espresso":
-            money, resources = process('espresso', resources, money)
-        elif response == "latte":
-            money, resources = process('latte', resources, money)
-        elif response == "cappuccino":
-            money, resources = process('cappuccino', resources, money)
-        elif response == "report":
-            report(money)
-        elif response == "off":
+        if response  == "off":
             break
+        elif response == "report":
+            report()
+        else:
+            drink = MENU[response]
+            if in_stock(drink["ingredients"]):
+                payment = process_coins()
+                if valid_amount(payment, drink["cost"]):
+                    process_drink(response, drink["ingredients"])
 
 
-def process(name: str, sources: list, funds: float):
-
-    stock_flag, missing = in_stock(name, sources)
-
-    if stock_flag != True:
-        print(f"Sorry there is not enough {missing}")
-    else:
-        funds_flag, funds = process_coins(name, funds)
-        if funds_flag:
-            sources = process_drink(name, sources)
-            print("Here is your latte. Enjoy!")
-    
-    return funds, sources
-
-
-def in_stock(name: str, sources: list):
-    for k, v in MENU[name]['ingredients'].items():
-        if sources[k] < v:
-            return False, k
+def in_stock(ingredients: list):
+    for item in ingredients:
+        if ingredients[item] > resources[item]:
+            print(f"Sorry there is not enough {item}")
+            return False
             
-    return True, ""
+    return True
+
+def process_coins():
+    print("Insert coins.")
+    total = float(input("Quarters: ")) * 0.25
+    total += float(input("Dimes: ")) * 0.10
+    total += float(input("Nickels: ")) * 0.05
+    total += float(input("Pennies: ")) * 0.01
+
+    return total
 
 
-def process_coins(name: str, funds: str):
-    change = 0.0
-
-    print("Insert coins:")
-    quarters = float(input("Quarters: ")) * 0.25
-    dimes = float(input("Dimes: ")) * 0.10
-    nickles = float(input("Nickels: ")) * 0.05
-    pennies = float(input("Pennies: ")) * 0.01
-
-    total = quarters + dimes + nickles + pennies
-
-    if total < MENU[name]["cost"]:
-        print("Sorry that's not enough money. Money refunded.")
-        return False
-    elif total > MENU[name]["cost"]:
-        change = total - MENU[name]["cost"]
-        funds += MENU[name]["cost"]
-        print(f"Here is ${change} dollars in change.")
+def valid_amount(payment: float, cost: float):
+    if payment >= cost:
+        change = round(payment - cost, 2)
+        print(f"Here is ${change} in change.")
+        global money
+        money += cost
+        return True
     else:
-        funds += MENU[name]["cost"]
-    
-    return True, funds
+        print("Sorry that is not enough money. Money refunded.")
+        return False
 
 
-def process_drink(name: str, sources: list):
-    for k, v in MENU[name]['ingredients'].items():
-        sources[k] -= v
+def process_drink(name: str, ingredients: list):
+    for item in ingredients:
+        resources[item] -= ingredients[item]
+    print(f"Here is your {name}. Enjoy!")
 
-    return sources
 
-
-def report(funds: float):
+def report():
+    global money
     print(f"Water: {resources['water']}ml")
     print(f"Milk: {resources['milk']}ml")
     print(f"Coffee: {resources['coffee']}g")
-    print(f"Money: ${funds}")
+    print(f"Money: ${money}")
 
-if __name__ == "__main__":
-    start(resources)
-# print(MENU['espresso']['ingredients']['water'])
-#in_stock("espresso", resources)
+
+start(resources)
