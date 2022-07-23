@@ -1,6 +1,3 @@
-from pydoc import source_synopsis
-
-
 MENU = {
     "espresso": {
         "ingredients": {
