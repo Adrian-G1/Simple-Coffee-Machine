@@ -6,7 +6,9 @@
 
 ### Additionally, the following commands are also accepted:
 - Report
-#### Which would report current values of ingredients.
+#### Reports current ingredient values.
 
 - Off
 #### Breaks out of program.
+#
+### Program operates using procedural programming.

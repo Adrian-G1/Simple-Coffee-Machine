@@ -94,4 +94,4 @@ def report():
     print(f"Money: ${money}")
 
 
-start(resources)
+start()
